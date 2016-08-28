@@ -12,7 +12,7 @@ SplitDataSet <- function(semesters,main.data.frames){
   AllWeek <- main.data.frames@AllWeek
   AllBio <- main.data.frames@AllBio
   AllPeak <- main.data.frames@AllPeak
-  
+
   semesters <-  unique(AllFim$academic.cycle)
 
   all.data.set <- new("AllDataSet",
@@ -62,9 +62,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     BioWeeks <- rbind(BioWeeks,BioWeek)
   }
 
+  nFin <- nrow(Fim)
+  BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
+
   BioGrad <- subset(AllBio, grado == my.grado)
   BioGradWeek5 <- subset(BioWeeks, semana == 5)
-  BioGradWeek9 <- subset(BioWeeks, semana == 6)
+  BioGradWeek9 <- subset(BioWeeks, semana == 9)
   BioGradWeek13 <- subset(BioWeeks, semana == 13)
   BioGradFin <- subset(BioWeeks, semana == 19)
 
@@ -82,9 +85,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     PeakWeeks <- rbind(PeakWeeks,PeakWeek)
   }
 
+  nFin <- nrow(Fim)
+  PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
+
   PeakGrad <- subset(AllPeak, grado == my.grado)
   PeakGradWeek5 <- subset(PeakWeeks, semana == 5)
-  PeakGradWeek9 <- subset(PeakWeeks, semana == 6)
+  PeakGradWeek9 <- subset(PeakWeeks, semana == 9)
   PeakGradWeek13 <- subset(PeakWeeks, semana == 13)
   PeakGradFin <- subset(PeakWeeks, semana == 19)
 
@@ -107,10 +113,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     BioWeek <- subset(AllWeek, student.id %in% BioTec$student.id & grado == my.grado & academic.cycle == semester )
     BioWeeks <- rbind(BioWeeks,BioWeek)
   }
+  nFin <- nrow(Fim)
+  BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
 
   BioTec <- subset(AllBio, grado == my.grado)
   BioTecWeek5 <- subset(BioWeeks, semana == 5)
-  BioTecWeek9 <- subset(BioWeeks, semana == 6)
+  BioTecWeek9 <- subset(BioWeeks, semana == 9)
   BioTecWeek13 <- subset(BioWeeks, semana == 13)
   BioTecFin <- subset(BioWeeks, semana == 19)
 
@@ -127,10 +135,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     PeakWeek <- subset(AllWeek, student.id %in% PeakTec$student.id & grado == my.grado & academic.cycle == semester )
     PeakWeeks <- rbind(PeakWeeks,PeakWeek)
   }
+  nFin <- nrow(Fim)
+  PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
 
   PeakTec <- subset(AllPeak, grado == my.grado)
   PeakTecWeek5 <- subset(PeakWeeks, semana == 5)
-  PeakTecWeek9 <- subset(PeakWeeks, semana == 6)
+  PeakTecWeek9 <- subset(PeakWeeks, semana == 9)
   PeakTecWeek13 <- subset(PeakWeeks, semana == 13)
   PeakTecFin <- subset(PeakWeeks, semana == 19)
 
@@ -154,10 +164,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     BioWeek <- subset(AllWeek, student.id %in% BioPosGrad$student.id & grado == my.grado & academic.cycle == semester )
     BioWeeks <- rbind(BioWeeks,BioWeek)
   }
+  nFin <- nrow(Fim)
+  BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
 
   BioPosGrad <- subset(AllBio, grado == my.grado)
   BioPosGradWeek5 <- subset(BioWeeks, semana == 5)
-  BioPosGradWeek9 <- subset(BioWeeks, semana == 6)
+  BioPosGradWeek9 <- subset(BioWeeks, semana == 9)
   BioPosGradWeek13 <- subset(BioWeeks, semana == 13)
   BioPosGradFin <- subset(BioWeeks, semana == 19)
 
@@ -174,10 +186,12 @@ SplitDataSet <- function(semesters,main.data.frames){
     PeakWeek <- subset(AllWeek, student.id %in% PeakPosGrad$student.id & grado == my.grado & academic.cycle == semester )
     PeakWeeks <- rbind(PeakWeeks,PeakWeek)
   }
+  nFin <- nrow(Fim)
+  PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
 
   PeakPosGrad <- subset(AllPeak, grado == my.grado)
   PeakPosGradWeek5 <- subset(PeakWeeks, semana == 5)
-  PeakPosGradWeek9 <- subset(PeakWeeks, semana == 6)
+  PeakPosGradWeek9 <- subset(PeakWeeks, semana == 9)
   PeakPosGradWeek13 <- subset(PeakWeeks, semana == 13)
   PeakPosGradFin <- subset(PeakWeeks, semana == 19)
 
