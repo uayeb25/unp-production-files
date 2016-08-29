@@ -1,7 +1,7 @@
 import os
 import shutil
 
-folder = "models"
+folder = "sources"
 
 for file in os.listdir(folder+"/"):
     source = folder+"/"+file

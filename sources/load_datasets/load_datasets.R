@@ -83,6 +83,11 @@ load.data <-  function(semesters){
     }
   }
   
+  #Drop stop.out.flag 
+  main.data.frames@AllPeak <- main.data.frames@AllPeak[,!(names(main.data.frames@AllPeak)%in%c("stop.out.flag.1"))]
+  main.data.frames@AllFim <- main.data.frames@AllFim[,!(names(main.data.frames@AllFim)%in%c("stop.out.flag.1"))]
+  main.data.frames@AllBio <- main.data.frames@AllBio[,!(names(main.data.frames@AllBio)%in%c("stop.out.flag.1"))]
+  main.data.frames@AllWeek <- main.data.frames@AllWeek[,!(names(main.data.frames@AllWeek)%in%c("stop.out.flag.1"))]
 
   main.data.frames <- new("MainClasses",
                           AllPeak = AllPeak,
