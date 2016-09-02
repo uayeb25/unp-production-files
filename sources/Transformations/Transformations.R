@@ -91,7 +91,7 @@ FormaIngressoTransformation <- function(formaingresso){
   if( trim(formaingresso) %in% group_1 ){
     "ENEM"
   }else if( trim(formaingresso) %in% group_2 ){
-    as.character(formaingresso)
+    "VESTIBULAR"
   }else{
     "OUTRAS"
   }
@@ -99,28 +99,34 @@ FormaIngressoTransformation <- function(formaingresso){
 }
 
 FacultyTransformation_Grad <- function(faculty){
-  group_1 <- c("ESCOLA DE GESTAO E NEGÓCIOS - MOSSORÓ","ESCOLA DO DIREITO - MOSSORÓ","ESCOLA DE ENGENHARIAS E CIENCIAS EXATAS - MOSSORÓ","ESCOLA DA SAÚDE - MOSSORÓ")
-  group_2 <- c("ESCOLA DE EDUCAÇAO","ESCOLA DE COMUNICAÇAO E ARTES","ESCOLA DO DIREITO")
+  group_1 <- "MOSSORÓ"
+  group_2 <- c("ESCOLA DA SAÚD",
+              "ESCOLA DE ENGENHARIAS E CIENCIAS EXATAS",
+              "ESCOLA DE GESTAO E NEGÓCIOS",
+              "ESCOLA DE HOSPITALIDADE")
 
-  if( trim(faculty)%in%group_1 ){
+  if( length(grepl(group_1,trim(faculty)))>1  ){
     "MOSSORÓ"
   }else if( trim(faculty)%in%group_2 ){
-    "OUTRAS"
-  }else{
     as.character(faculty)
+  }else{
+    "OUTRAS"
   }
 }
 
 FacultyTransformation_Tec <- function(faculty){
-  group_1 <- c("ESCOLA DE ENGENHARIAS E CIENCIAS EXATAS - MOSSORÓ","ESCOLA DE GESTAO E NEGÓCIOS - MOSSORÓ")
-  group_2 <- c("ESCOLA DE EDUCAÇAO","ESCOLA DE COMUNICAÇAO E ARTES","ESCOLA DO DIREITO")
-
-  if( trim(faculty)%in%group_1 ){
+  group_1 <- "MOSSORÓ"
+  group_2 <- c("ESCOLA DA SAÚD",
+               "ESCOLA DE ENGENHARIAS E CIENCIAS EXATAS",
+               "ESCOLA DE GESTAO E NEGÓCIOS",
+               "ESCOLA DE HOSPITALIDADE")
+  
+  if( length(grepl(group_1,trim(faculty)))>1  ){
     "MOSSORÓ"
   }else if( trim(faculty)%in%group_2 ){
-    "OUTRAS"
-  }else{
     as.character(faculty)
+  }else{
+    "OUTRAS"
   }
 }
 
