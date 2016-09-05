@@ -214,9 +214,16 @@ for (grad in grads) {
     
     #### cast variables ####
     
+    no.count <- c()
+    for(m.var in gbmFit$coefnames){
+      if( nrow(as.data.frame(table(grepl(m.var, gbmFit$coefnames[!(gbmFit$coefnames%in%m.var)] )))) > 1 & !(m.var == "age")   )
+        no.count <- c(no.count,m.var)
+    }
+    
+    
     int.vars <- names(test)[names(test)%in%gbmFit$coefnames]
     
-    for (int.var in int.vars) {
+    for (int.var in int.vars[!(int.vars%in%no.count)] ) {
       test[,int.var] <- as.numeric(test[,int.var])
     }
     
@@ -241,7 +248,7 @@ for (grad in grads) {
     
     
     tryToPredict <- tryCatch({
-      predictions.prob <- predict(gbmFit,test,type="prob")  
+      predictions.prob <- predict(gbmFit,test,type="prob")
     }, warning = function(war){
       
       send.email.message("We have detect an error, a support admin will contact with you!","UNP")
@@ -364,12 +371,6 @@ for (grad in grads) {
       })
       
     }
-    
-    
-    
-    
-    
-
 
 
   }
