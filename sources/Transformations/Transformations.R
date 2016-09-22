@@ -105,7 +105,7 @@ FacultyTransformation_Grad <- function(faculty){
               "ESCOLA DE GESTAO E NEGÓCIOS",
               "ESCOLA DE HOSPITALIDADE")
 
-  if( length(grepl(group_1,trim(faculty)))>1  ){
+  if( grepl(group_1,faculty) == TRUE  ){
     "MOSSORÓ"
   }else if( trim(faculty)%in%group_2 ){
     as.character(faculty)
@@ -121,7 +121,7 @@ FacultyTransformation_Tec <- function(faculty){
                "ESCOLA DE GESTAO E NEGÓCIOS",
                "ESCOLA DE HOSPITALIDADE")
   
-  if( length(grepl(group_1,trim(faculty)))>1  ){
+  if( grepl(group_1,faculty) == TRUE  ){
     "MOSSORÓ"
   }else if( trim(faculty)%in%group_2 ){
     as.character(faculty)

@@ -50,13 +50,6 @@ send.slack.model.completed <- function(university,
   
 }
 
-
-send.slack.notification.model.downloaded <- function(model){
-  url <- paste0("https://mbi-laureate.appspot.com/slack/model/",model)
-  load <- fromJSON(url)
-  print(load)
-}
-
 add.email.for.model.completed <- function(email){
   url <- paste0("https://mbi-laureate.appspot.com/email/",email,"/action/create/proposal/model-completed")
   load <- fromJSON(url)
