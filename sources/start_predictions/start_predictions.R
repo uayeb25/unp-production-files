@@ -268,10 +268,10 @@ for (grad in grads) {
         test <- AddDeciles(test,predictions.prob)
       }, warning = function(war){
         send.email.message(paste0("Error adding decil risk on ",str),"UNP")
-        print("Error")
+        test$risk_decile <- 1
       }, error = function(err){
         send.email.message(paste0("Error adding decil risk on ",str),"UNP")
-        print("Error")
+        test$risk_decile <- 1
       })
 
 
@@ -386,6 +386,8 @@ for (grad in grads) {
 
 
       making.output <- tryCatch({
+        test.all.fields$semana <- as.character(unique(main.data.frames@AllWeek$semana))
+        test$semana <- as.character(unique(main.data.frames@AllWeek$semana))
         write.csv2(test, file = paste0("outputs/",model.processed,semesters,".csv") )
         write.csv2(test.all.fields, file = paste0("outputs/",model.processed,"_extended_version_",semesters,".csv") )
       },warning = function(war){
