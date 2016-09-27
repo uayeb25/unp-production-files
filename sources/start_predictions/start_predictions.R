@@ -94,7 +94,7 @@ validate.risk <- function(val,kind){
     rules <- get("academic.rules" ,envir =  my.env)
   else
     rules <- get("finance.rules", envir = my.env)
-
+  
   val <- as.numeric(val)
   rules$inf.limit <- as.numeric(rules$inf.limit)
   rules$max.limit <- as.numeric(rules$max.limit)
@@ -113,31 +113,30 @@ validate.risk <- function(val,kind){
 }
 
 AddDeciles <- function(data.set,prediccion){
+  
   prediccion <- data.frame(prediccion)
   names(prediccion) <- c("1","2")
   data.set <- cbind(data.set,prediccion)
-
-  q10 <- quantile(data.set[,"2"]
-                  ,probs = seq(0,1,by = 0.1)
-  )
-
-  if(length(unique(q10)) < 11){
-    u <- length(unique(q10))
-    for(i in 2:(u-1)){
-      if(as.logical(q10[i] == q10[i-1])){
-        q10[i] <- (q10[i-1]+q10[i+1])/2
-      }
+  
+  data.set$risk_decile <-  -1
+  
+  data.set <- data.set[order(-data.set$'2'),]
+  nrow(data.set)/10
+  
+  size <- round(nrow(data.set)/10)
+  
+  for (decile in 1:10) {
+    if(decile != 10){
+      this.rows <- row.names(head(data.set[data.set$risk_decile == -1,],size))
+      data.set[rownames(data.set)%in%this.rows,"risk_decile"] <- decile
+      nrow(data.set)
+      table(data.set$risk_decile)
+    }else{
+      data.set[data.set$risk_decile == -1,"risk_decile"] <- decile
     }
+    
   }
-
-  data.set$risk_decile <- cut(data.set[,"2"]
-                              ,breaks = q10
-                              ,include.lowest = T
-                              ,labels = 10:1)
-
-  data.set$risk_decile <- factor(as.character(data.set$risk_decile)
-                                 ,levels = c('1','2','3','4','5','6',
-                                             '7','8','9','10'))
+  
   data.set
 }
 
@@ -145,16 +144,18 @@ AddDeciles <- function(data.set,prediccion){
 ### Load rules and cutoff ###
 
 
-if(need_model_update("metrics")){
+if(need_model_update("metrics") | dev){
   download_unp_model("metrics","models",".RData")
-  update_model("metrics","0")
+  if(!dev)
+    update_model("metrics","0")
   send.slack.notification.model.downloaded("metrics")
 }
 load("models_gbm/metrics.RData")
 
-if(need_model_update("clusterRules")){
+if(need_model_update("clusterRules") | dev){
   download_unp_model("clusterRules","models",".RData")
-  update_model("clusterRules","0")
+  if(!dev)
+    update_model("clusterRules","0")
   send.slack.notification.model.downloaded("clusterRules")
 }
 load("models_gbm/clusterRules.RData")
@@ -190,7 +191,7 @@ for (grad in grads) {
     try.with <- c("Week5","Week9","Week13","Fin")
     model <- ""
     for (i.want.try.with in try.with) {
-
+ 
       try.now <- get(paste0(str,i.want.try.with),envir = my.env)
       if(nrow(try.now)>1)
         model <- i.want.try.with
@@ -203,31 +204,32 @@ for (grad in grads) {
 
 
     model_text <- paste0("model_",str)
-    if( need_model_update(model_text) ){
+    if( need_model_update(model_text) | dev ){
       download_unp_model(model_text,"models",".RData")
-      update_model(model_text,"0")
+      if(!dev)
+        update_model(model_text,"0")
       send.slack.notification.model.downloaded(model_text)
     }
 
     load(paste0("models_gbm/",model_text,".RData"))
     test <- get(str, envir = my.env)
-
-
+    
+    
     #### cast variables ####
-
+    
     no.count <- c()
     for(m.var in gbmFit$coefnames){
       if( nrow(as.data.frame(table(grepl(m.var, gbmFit$coefnames[!(gbmFit$coefnames%in%m.var)] )))) > 1 & !(m.var == "age")   )
         no.count <- c(no.count,m.var)
     }
-
-
+    
+    
     int.vars <- names(test)[names(test)%in%gbmFit$coefnames]
-
+    
     for (int.var in int.vars[!(int.vars%in%no.count)] ) {
       test[,int.var] <- as.numeric(test[,int.var])
     }
-
+    
     factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","scholarship.months")
     for (coln in colnames(test)) {
       for (fv in factor.variable) {
@@ -239,112 +241,97 @@ for (grad in grads) {
       }
     }
 
-
+    
 
     #### Predictions        ####
     #                          #
     ############################
-
+    
     continue <- TRUE
-
-
+    
+    
     tryToPredict <- tryCatch({
       predictions.prob <- predict(gbmFit,test,type="prob")
     }, warning = function(war){
-
-      send.email.message("We have detect an error, a support admin will contact with you!","UNP")
+      if(!dev)
+        send.email.message("We have detect an error, a support admin will contact with you!","UNP")
       continue <- FALSE
     } ,error = function(err){
-
-      send.email.message("We have detect an error, a support admin will contact with you!","UNP")
+      if(!dev)
+        send.email.message("We have detect an error, a support admin will contact with you!","UNP")
       continue <- FALSE
     })
-
-
-
+    
+    
+    
     if(continue){
-
+      
       tryAddDecil <- tryCatch({
-        test <- AddDeciles(test,predictions.prob)
+        test <- AddDeciles(test,predictions.prob)  
       }, warning = function(war){
-        send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        if(!dev)
+          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        
         test$risk_decile <- 1
       }, error = function(err){
-        send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        if(!dev)
+          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        
         test$risk_decile <- 1
       })
-
-
-
+      
+      
+      
       percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
-      vector <- seq(.01,.9,by = .01)
-      my.best.value <- 1
-      my.best.cut.off <- .01
-      for (cut.off in vector) {
-        new.predict.class <-  rep(0, length(predictions.prob[,2]))
-        new.predict.class[predictions.prob[,2] >= cut.off] <- 1
-        new.predict.class <- as.factor(new.predict.class)
-        if(length(subset(as.data.frame(table(new.predict.class)), new.predict.class == "1")$Freq) > 0){
-          percent <- subset(as.data.frame(table(new.predict.class)), new.predict.class == "1")$Freq/length(new.predict.class)
-          calc <- abs(percent - percent_drop_out)
-          if(calc < my.best.value){
-            my.best.value <- calc
-            my.best.cut.off <- cut.off
-          }
-        }
-
-
-      }
-
-      cut.off <- my.best.cut.off
-
+      cut.off <- models.metrics[ models.metrics$model == str ,]$cut.off[1]
+      
       new.predict.class <-  rep(0, length(predictions.prob[,2]))
       new.predict.class[predictions.prob[,2] >= cut.off] <- 1
       new.predict.class <- as.factor(new.predict.class)
-
+      
       test$prediction <- new.predict.class
       test$probs <- predictions.prob[,2]
       test$general_risk <- mapply(general.risk, test$probs, cut.off)
-
+      
       #print(table(test$prediction))
-
-
+      
+      
       ### Sub Set ###
       #             #
       ###############
-
+      
       students.drop.out <- subset(test, prediction == 1)
-
+      
       ### Cluster treatment      ###
       #                            #
       ##############################
-
+      
       my.rules <- subset(clusterRules, model == str)
-
+      
       #Academic
       academic.rules <- subset(my.rules, category == "academic")
       academic.rules <- academic.rules[order(-academic.rules$prob),]
       academic.variable <- as.character(unique(academic.rules$variable))
       test$academic.risk <- mapply(validate.risk, test[,academic.variable],"academic")
       test$academic.variable <- academic.variable
-
+      
       test[test$prediction == 0,"academic.risk"] <- "LOW"
       test[test$prediction == 0,"academic.variable"] <- ""
-
+      
       #finance
       finance.rules <- subset(my.rules, category == "finance")
       finance.rules <- finance.rules[order(-finance.rules$prob),]
       finance.variable <- as.character(unique(finance.rules$variable))
       test$finance.risk <- mapply(validate.risk, test[,finance.variable],"finance")
       test$finance.variable <- finance.variable
-
+      
       test[test$prediction == 0,"finance.risk"] <- "LOW"
       test[test$prediction == 0,"finance.variable"] <- ""
-
+      
       ####### Send Notification ##########
       #                                  #
       ####################################
-
+      
       University <- "UnP"
       model.processed <- paste0("Week-",
                                 as.character(unique(main.data.frames@AllWeek$semana)),
@@ -352,52 +339,59 @@ for (grad in grads) {
                                 if(kind=="Bio") "Novo" else "Veteran",
                                 "-For-",
                                 grad)
-      high.finance <- as.character(subset(as.data.frame(table(test$finance.risk)), Var1 == "HIGH")$Freq)
-      medium.finance <- as.character(subset(as.data.frame(table(test$finance.risk)), Var1 == "MEDIUM")$Freq)
-      high.academic <- as.character(subset(as.data.frame(table(test$academic.risk)), Var1 == "HIGH")$Freq)
-      medium.academic <- as.character(subset(as.data.frame(table(test$academic.risk)), Var1 == "MEDIUM")$Freq)
-      risk <- as.character(subset(as.data.frame(table(test$prediction)),Var1 == 1)$Freq)
-      safe <- as.character(subset(as.data.frame(table(test$prediction)),Var1 == 0)$Freq)
-
+      high.finance <- as.character(round(subset(as.data.frame(table(test$finance.risk)), Var1 == "HIGH")$Freq/nrow(test),2)*100)
+      medium.finance <- as.character(round(subset(as.data.frame(table(test$finance.risk)), Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
+      high.academic <- as.character(round(subset(as.data.frame(table(test$academic.risk)), Var1 == "HIGH")$Freq/nrow(test),2)*100)
+      medium.academic <- as.character(round(subset(as.data.frame(table(test$academic.risk)), Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
+      risk <- as.character(round(subset(as.data.frame(table(test$general_risk)),Var1 == "HIGH")$Freq/nrow(test),2)*100)
+      safe <- as.character(round(subset(as.data.frame(table(test$general_risk)),Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
+      
       high.finance <- if(length(high.finance)==0) "0" else high.finance
       medium.finance <- if(length(medium.finance)==0) "0" else medium.finance
       high.academic <- if(length(high.academic)==0) "0" else high.academic
       medium.academic <- if(length(medium.academic)==0) "0" else medium.academic
       risk <- if(length(risk)==0) "0" else risk
       safe <- if(length(safe)==0) "0" else safe
-
+      
       print("sending notification")
-      send.email.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
-      send.slack.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
-
+      if(!dev){
+        send.email.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
+        send.slack.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
+      }
+      
       #### Printing output
       print("making output")
-
-
+      
+      
       test$student.id <- mapply(getOriginalStudentID, row.names(test))
       row.names(test) <- 1:nrow(test)
       test <- test[,!(names(test)%in%c("1","2"))]
-
+      
       complete.data.set <- getOriginDataSet(str)
       add.fields <- names(test)[!(names(test)%in%names(complete.data.set))]
       add.fields <- c("student.id",add.fields)
       test.sample <- test[,add.fields]
       test.all.fields <- merge(complete.data.set,test.sample,by = c("student.id"))
-
+      
+      test <- test[, !(names(test)%in%c("prediction")) ]
 
       making.output <- tryCatch({
         test.all.fields$semana <- as.character(unique(main.data.frames@AllWeek$semana))
         test$semana <- as.character(unique(main.data.frames@AllWeek$semana))
         write.csv2(test, file = paste0("outputs/",model.processed,semesters,".csv") )
-        write.csv2(test.all.fields, file = paste0("outputs/",model.processed,"_extended_version_",semesters,".csv") )
+        write.csv2(test.all.fields, file = paste0("outputs/",model.processed,"_extended_version_",semesters,".csv") )  
       },warning = function(war){
-        send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
+        if(!dev)
+          send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
       }, error = function(err){
-        send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
+        if(!dev)
+          send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
       })
-
+      
     }
 
 
   }
 }
+
+
