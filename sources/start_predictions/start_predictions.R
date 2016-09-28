@@ -299,8 +299,8 @@ for (grad in grads) {
       test$academic.risk <- mapply(validate.risk, test[,academic.variable],"academic")
       test$academic.variable <- academic.variable
       
-      test[test$prediction == 0,"academic.risk"] <- "LOW"
-      test[test$prediction == 0,"academic.variable"] <- ""
+      #test[test$prediction == 0,"academic.risk"] <- "LOW"
+      #test[test$prediction == 0,"academic.variable"] <- ""
       
       #finance
       finance.rules <- subset(my.rules, category == "finance")
@@ -309,8 +309,8 @@ for (grad in grads) {
       test$finance.risk <- mapply(validate.risk, test[,finance.variable],"finance")
       test$finance.variable <- finance.variable
       
-      test[test$prediction == 0,"finance.risk"] <- "LOW"
-      test[test$prediction == 0,"finance.variable"] <- ""
+      #test[test$prediction == 0,"finance.risk"] <- "LOW"
+      #test[test$prediction == 0,"finance.variable"] <- ""
       
       tryAddDecil <- tryCatch({
         test <- AddDeciles(test,predictions.prob)  
