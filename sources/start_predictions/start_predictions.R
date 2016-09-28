@@ -266,22 +266,6 @@ for (grad in grads) {
     
     if(continue){
       
-      tryAddDecil <- tryCatch({
-        test <- AddDeciles(test,predictions.prob)  
-      }, warning = function(war){
-        if(!dev)
-          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
-        
-        test$risk_decile <- 1
-      }, error = function(err){
-        if(!dev)
-          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
-        
-        test$risk_decile <- 1
-      })
-      
-      
-      
       percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
       cut.off <- models.metrics[ models.metrics$model == str ,]$cut.off[1]
       
@@ -327,6 +311,20 @@ for (grad in grads) {
       
       test[test$prediction == 0,"finance.risk"] <- "LOW"
       test[test$prediction == 0,"finance.variable"] <- ""
+      
+      tryAddDecil <- tryCatch({
+        test <- AddDeciles(test,predictions.prob)  
+      }, warning = function(war){
+        if(!dev)
+          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        
+        test$risk_decile <- 1
+      }, error = function(err){
+        if(!dev)
+          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        
+        test$risk_decile <- 1
+      })
       
       ####### Send Notification ##########
       #                                  #
