@@ -354,10 +354,10 @@ for (grad in grads) {
       safe <- if(length(safe)==0) "0" else safe
       
       print("sending notification")
-      if(!dev){
+      if(!dev)
         send.email.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
-        send.slack.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
-      }
+      
+      send.slack.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)  
       
       #### Printing output
       print("making output")
