@@ -144,18 +144,16 @@ AddDeciles <- function(data.set,prediccion){
 ### Load rules and cutoff ###
 
 
-if(need_model_update("metrics") | dev){
+if(need_model_update("metrics") ){
   download_unp_model("metrics","models",".RData")
-  if(!dev)
-    update_model("metrics","0")
+  update_model("metrics","0")
   send.slack.notification.model.downloaded("metrics")
 }
 load("models_gbm/metrics.RData")
 
-if(need_model_update("clusterRules") | dev){
+if(need_model_update("clusterRules")){
   download_unp_model("clusterRules","models",".RData")
-  if(!dev)
-    update_model("clusterRules","0")
+  update_model("clusterRules","0")
   send.slack.notification.model.downloaded("clusterRules")
 }
 load("models_gbm/clusterRules.RData")
@@ -204,10 +202,9 @@ for (grad in grads) {
 
 
     model_text <- paste0("model_",str)
-    if( need_model_update(model_text) | dev ){
+    if( need_model_update(model_text)){
       download_unp_model(model_text,"models",".RData")
-      if(!dev)
-        update_model(model_text,"0")
+      update_model(model_text,"0")
       send.slack.notification.model.downloaded(model_text)
     }
 
