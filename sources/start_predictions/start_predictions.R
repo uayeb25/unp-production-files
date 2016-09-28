@@ -373,7 +373,7 @@ for (grad in grads) {
       test.sample <- test[,add.fields]
       test.all.fields <- merge(complete.data.set,test.sample,by = c("student.id"))
       
-      test <- test[, !(names(test)%in%c("prediction")) ]
+      
 
       making.output <- tryCatch({
         test.all.fields$semana <- as.character(unique(main.data.frames@AllWeek$semana))
