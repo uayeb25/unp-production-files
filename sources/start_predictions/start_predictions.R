@@ -329,7 +329,7 @@ for (grad in grads) {
       
       University <- "UnP"
       model.processed <- paste0("Week-",
-                                as.character(unique(main.data.frames@AllWeek$semana)),
+                                as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana)),
                                 "-",
                                 if(kind=="Bio") "Novo" else "Veteran",
                                 "-For-",
@@ -371,8 +371,8 @@ for (grad in grads) {
       
 
       making.output <- tryCatch({
-        test.all.fields$semana <- as.character(unique(main.data.frames@AllWeek$semana))
-        test$semana <- as.character(unique(main.data.frames@AllWeek$semana))
+        test.all.fields$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
+        test$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
         write.csv2(test, file = paste0("outputs/",model.processed,semesters,".csv") )
         write.csv2(test.all.fields, file = paste0("outputs/",model.processed,"_extended_version_",semesters,".csv") )  
       },warning = function(war){
