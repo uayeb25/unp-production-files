@@ -75,9 +75,9 @@ getOriginalStudentID <- function(string){
 
 general.risk <- function(probability,cutoff){
   risk <- ""
-  if( probability < cutoff ){
+  if( probability <= .25 ){
     risk <- "LOW"
-  }else if(probability >= cutoff & probability < .7){
+  }else if(probability > .25 & probability <= .75){
     risk <- "MEDIUM"
   }else{
     risk <- "HIGH"
@@ -246,6 +246,7 @@ for (grad in grads) {
     
     continue <- TRUE
     
+    test$other.financial.aid.flag <- as.numeric(test$other.financial.aid.flag)
     
     tryToPredict <- tryCatch({
       predictions.prob <- predict(gbmFit,test,type="prob")
@@ -263,13 +264,17 @@ for (grad in grads) {
     
     if(continue){
       
+      base <- max(predictions.prob[,2]) + 0.01
+      new_base <- .95
+      predictions.prob[,2] <- (predictions.prob[,2]*new_base)/base
+      
       percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
       cut.off <- models.metrics[ models.metrics$model == str ,]$cut.off[1]
       
       new.predict.class <-  rep(0, length(predictions.prob[,2]))
-      new.predict.class[predictions.prob[,2] >= cut.off] <- 1
+      new.predict.class[predictions.prob[,2] >= .25] <- 1
       new.predict.class <- as.factor(new.predict.class)
-      
+       
       test$prediction <- new.predict.class
       test$probs <- predictions.prob[,2]
       test$general_risk <- mapply(general.risk, test$probs, cut.off)
@@ -296,9 +301,6 @@ for (grad in grads) {
       test$academic.risk <- mapply(validate.risk, test[,academic.variable],"academic")
       test$academic.variable <- academic.variable
       
-      test[test$prediction == 0,"academic.risk"] <- "LOW"
-      test[test$prediction == 0,"academic.variable"] <- ""
-      
       #finance
       finance.rules <- subset(my.rules, category == "finance")
       finance.rules <- finance.rules[order(-finance.rules$prob),]
@@ -306,8 +308,18 @@ for (grad in grads) {
       test$finance.risk <- mapply(validate.risk, test[,finance.variable],"finance")
       test$finance.variable <- finance.variable
       
+      #######################
+      
+      test[test$finance.risk == "HIGH" & test$general_risk != "HIGH","finance.risk"] <-  "MEDIUM"
+      test[test$academic.risk == "HIGH" & test$general_risk != "HIGH","academic.risk"] <-  "MEDIUM"
+      
       test[test$prediction == 0,"finance.risk"] <- "LOW"
       test[test$prediction == 0,"finance.variable"] <- ""
+      
+      test[test$prediction == 0,"academic.risk"] <- "LOW"
+      test[test$prediction == 0,"academic.variable"] <- ""
+      
+      #######################
       
       tryAddDecil <- tryCatch({
         test <- AddDeciles(test,predictions.prob)  
