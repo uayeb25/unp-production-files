@@ -73,11 +73,11 @@ getOriginalStudentID <- function(string){
   substring(string,1,nchar(string)-7)
 }
 
-general.risk <- function(probability,cutoff){
+general.risk <- function(probability,cutoff1,cutoff2){
   risk <- ""
-  if( probability <= .25 ){
+  if( probability <= cutoff1 ){
     risk <- "LOW"
-  }else if(probability > .25 & probability <= .75){
+  }else if(probability > cutoff1 & probability <= cutoff2){
     risk <- "MEDIUM"
   }else{
     risk <- "HIGH"
@@ -163,7 +163,7 @@ load("models_gbm/clusterRules.RData")
 my.env <- environment()
 
 
-grads <- c("Grad","PosGrad","Tec")
+grads <- c("Grad","Tec")
 kinds <- c("Bio","Peak")
 
 
@@ -268,16 +268,33 @@ for (grad in grads) {
       new_base <- .95
       predictions.prob[,2] <- (predictions.prob[,2]*new_base)/base
       
-      percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
+      
       cut.off <- models.metrics[ models.metrics$model == str ,]$cut.off[1]
       
+      ##ordenamos nuestra liesta
+      to.order <- predictions.prob[,2]
+      ordered <- to.order[order(-to.order)]
+      
+      ##calculamos porcentaje historico de high
+      percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
+      first.limit <- round(length(ordered)*percent_drop_out)
+      cutoff2 <- tail(head(ordered,first.limit),1)
+      
+      ##calculamos porcentaje historico de medium
+      medium <- models.metrics[ models.metrics$model == str ,]$medium[1]
+      new.med <- medium + percent_drop_out
+      second.limit <- round(length(ordered)*new.med)
+      cutoff1 <- tail(head(ordered,second.limit),1)
+      
+      #prediction class
       new.predict.class <-  rep(0, length(predictions.prob[,2]))
-      new.predict.class[predictions.prob[,2] >= .25] <- 1
+      new.predict.class[predictions.prob[,2] >= cutoff2] <- 1
       new.predict.class <- as.factor(new.predict.class)
-       
       test$prediction <- new.predict.class
+      
+      #general risk
       test$probs <- predictions.prob[,2]
-      test$general_risk <- mapply(general.risk, test$probs, cut.off)
+      test$general_risk <- mapply(general.risk, test$probs, cutoff1, cutoff2)
       
       #print(table(test$prediction))
       
