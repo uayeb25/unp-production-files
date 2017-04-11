@@ -163,7 +163,7 @@ load("models_gbm/clusterRules.RData")
 my.env <- environment()
 
 
-grads <- c("Grad","Tec")
+grads <- c("Grad","PosGrad","Tec")
 kinds <- c("Bio","Peak")
 
 
