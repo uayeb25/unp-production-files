@@ -1,8 +1,8 @@
 library(caret)
-
+library(plyr)
 
 getOriginDataSet <- function(dataset.name){
-
+  
   if(dataset.name == "BioGrad")
     my.dataset <- all.data.set@BioGrad
   if(dataset.name == "BioGradWeek5")
@@ -63,9 +63,9 @@ getOriginDataSet <- function(dataset.name){
     my.dataset <- all.data.set@PeakTecWeek13
   if(dataset.name == "PeakTecFin")
     my.dataset <- all.data.set@PeakTecFin
-
+  
   my.dataset
-
+  
 }
 
 getOriginalStudentID <- function(string){
@@ -73,54 +73,25 @@ getOriginalStudentID <- function(string){
   substring(string,1,nchar(string)-7)
 }
 
-general.risk <- function(probability,cutoff1,cutoff2){
+general.risk <- function(probability){
   risk <- ""
-  if( probability <= cutoff1 ){
-    risk <- "LOW"
-  }else if(probability > cutoff1 & probability <= cutoff2){
-    risk <- "MEDIUM"
+  if( probability <= 0.25 ){
+    risk <- "GREEN"
+  }else if(probability > 0.25 & probability <= 0.5){
+    risk <- "YELLOW"
+  }else if(probability > 0.5 & probability <= 0.75){
+    risk <- "ORANGE"
   }else{
-    risk <- "HIGH"
+    risk <- "RED"
   }
   risk
 }
 
-
-validate.risk <- function(val,kind){
-
-  my.env <- environment()
-
-  if(kind == "academic")
-    rules <- get("academic.rules" ,envir =  my.env)
-  else
-    rules <- get("finance.rules", envir = my.env)
-  
-  val <- as.numeric(val)
-  rules$inf.limit <- as.numeric(rules$inf.limit)
-  rules$max.limit <- as.numeric(rules$max.limit)
-
-  risk <- "LOW"
-  for (i in 1:nrow(rules)) {
-    rule <- rules[i,]
-    if( val >= rule$inf.limit & val <= rule$max.limit ){
-      if(i==1)
-        risk <- "HIGH"
-      else
-        risk <- "MEDIUM"
-    }
-  }
-  risk
-}
-
-AddDeciles <- function(data.set,prediccion){
-  
-  prediccion <- data.frame(prediccion)
-  names(prediccion) <- c("1","2")
-  data.set <- cbind(data.set,prediccion)
+AddDeciles <- function(data.set){
   
   data.set$risk_decile <-  -1
   
-  data.set <- data.set[order(-data.set$'2'),]
+  data.set <- data.set[order(-data.set$probs),]
   nrow(data.set)/10
   
   size <- round(nrow(data.set)/10)
@@ -141,23 +112,6 @@ AddDeciles <- function(data.set,prediccion){
 }
 
 
-### Load rules and cutoff ###
-
-
-if(need_model_update("metrics") ){
-  download_unp_model("metrics","models",".RData")
-  update_model("metrics","0")
-  send.slack.notification.model.downloaded("metrics")
-}
-load("models_gbm/metrics.RData")
-
-if(need_model_update("clusterRules")){
-  download_unp_model("clusterRules","models",".RData")
-  update_model("clusterRules","0")
-  send.slack.notification.model.downloaded("clusterRules")
-}
-load("models_gbm/clusterRules.RData")
-
 #############################
 
 my.env <- environment()
@@ -170,44 +124,44 @@ kinds <- c("Bio","Peak")
 
 for (grad in grads) {
   for (kind in kinds) {
-
-
-
+    
+    
+    
     ###### check which model should to use ####
     #                                         #
     ###########################################
-
-
-
+    
+    
+    
     ##### Load Data ####
     #                  #
     ####################
-
+    
     ##### Choose model #####
     str <- paste0(kind,grad)
-
+    
     try.with <- c("Week5","Week9","Week13","Fin")
     model <- ""
     for (i.want.try.with in try.with) {
- 
+      
       try.now <- get(paste0(str,i.want.try.with),envir = my.env)
       if(nrow(try.now)>1)
         model <- i.want.try.with
     }
-
+    
     str <- paste0(str,model)
-
+    
     #######################
     print(paste0("predicting for ",str))
-
-
+    
+    
     model_text <- paste0("model_",str)
     if( need_model_update(model_text)){
       download_unp_model(model_text,"models",".RData")
       update_model(model_text,"0")
       send.slack.notification.model.downloaded(model_text)
     }
-
+    
     load(paste0("models_gbm/",model_text,".RData"))
     test <- get(str, envir = my.env)
     
@@ -222,7 +176,6 @@ for (grad in grads) {
     
     
     int.vars <- names(test)[names(test)%in%gbmFit$coefnames]
-    
     for (int.var in int.vars[!(int.vars%in%no.count)] ) {
       test[,int.var] <- as.numeric(test[,int.var])
     }
@@ -237,9 +190,20 @@ for (grad in grads) {
         }
       }
     }
-
     
-
+    factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","prouni.flag","scholarship.months")
+    for (coln in colnames(test)) {
+      for (fv in factor.variable) {
+        if(coln == fv & !(str %in% c("PeakGrad","PeakGradWeek5","PeakGradWeek9","PeakGradWeek13","PeakGradFin",
+                                     "PeakPosGrad","PeakPosGradWeek5","PeakPosGradWeek9","PeakPosGradWeek13","PeakPosGradFin",
+                                     "PeakTec","PeakTecWeek5","PeakTecWeek9","PeakTecWeek13","PeakTecFin")) ){
+          test[,coln] <- as.factor(test[,coln])
+        }
+      }
+    }
+    
+    
+    
     #### Predictions        ####
     #                          #
     ############################
@@ -248,148 +212,113 @@ for (grad in grads) {
     
     test$other.financial.aid.flag <- as.numeric(test$other.financial.aid.flag)
     
-    tryToPredict <- tryCatch({
-      predictions.prob <- predict(gbmFit,test,type="prob")
-    }, warning = function(war){
-      if(!dev)
-        send.email.message("We have detect an error, a support admin will contact with you!","UNP")
-      continue <- FALSE
-    } ,error = function(err){
-      if(!dev)
-        send.email.message("We have detect an error, a support admin will contact with you!","UNP")
-      continue <- FALSE
-    })
+    
+    predictions.prob <- predict(gbmFit,test,type="response")
+    
     
     
     
     if(continue){
       
-      base <- max(predictions.prob[,2]) + 0.01
-      new_base <- .95
-      predictions.prob[,2] <- (predictions.prob[,2]*new_base)/base
-      
-      
-      cut.off <- models.metrics[ models.metrics$model == str ,]$cut.off[1]
-      
-      ##ordenamos nuestra liesta
-      to.order <- predictions.prob[,2]
-      ordered <- to.order[order(-to.order)]
-      
-      ##calculamos porcentaje historico de high
-      percent_drop_out <- models.metrics[ models.metrics$model == str ,]$percent_drop_out[1]
-      first.limit <- round(length(ordered)*percent_drop_out)
-      cutoff2 <- tail(head(ordered,first.limit),1)
-      
-      ##calculamos porcentaje historico de medium
-      medium <- models.metrics[ models.metrics$model == str ,]$medium[1]
-      new.med <- medium + percent_drop_out
-      second.limit <- round(length(ordered)*new.med)
-      cutoff1 <- tail(head(ordered,second.limit),1)
-      
-      #prediction class
-      new.predict.class <-  rep(0, length(predictions.prob[,2]))
-      new.predict.class[predictions.prob[,2] >= cutoff2] <- 1
-      new.predict.class <- as.factor(new.predict.class)
-      test$prediction <- new.predict.class
-      
       #general risk
-      test$probs <- predictions.prob[,2]
-      test$general_risk <- mapply(general.risk, test$probs, cutoff1, cutoff2)
-      
-      #print(table(test$prediction))
-      
-      
-      ### Sub Set ###
-      #             #
-      ###############
-      
-      students.drop.out <- subset(test, prediction == 1)
-      
-      ### Cluster treatment      ###
-      #                            #
-      ##############################
-      
-      my.rules <- subset(clusterRules, model == str)
-      
-      #Academic
-      academic.rules <- subset(my.rules, category == "academic")
-      academic.rules <- academic.rules[order(-academic.rules$prob),]
-      academic.variable <- as.character(unique(academic.rules$variable))
-      test$academic.risk <- mapply(validate.risk, test[,academic.variable],"academic")
-      test$academic.variable <- academic.variable
-      
-      #finance
-      finance.rules <- subset(my.rules, category == "finance")
-      finance.rules <- finance.rules[order(-finance.rules$prob),]
-      finance.variable <- as.character(unique(finance.rules$variable))
-      test$finance.risk <- mapply(validate.risk, test[,finance.variable],"finance")
-      test$finance.variable <- finance.variable
+      test$probs <- predictions.prob
+      test$general_risk <- mapply(general.risk, test$probs)
       
       #######################
       
-      test[test$finance.risk == "HIGH" & test$general_risk != "HIGH","finance.risk"] <-  "MEDIUM"
-      test[test$academic.risk == "HIGH" & test$general_risk != "HIGH","academic.risk"] <-  "MEDIUM"
       
-      test[test$prediction == 0,"finance.risk"] <- "LOW"
-      test[test$prediction == 0,"finance.variable"] <- ""
+      test <- AddDeciles(test)  
       
-      test[test$prediction == 0,"academic.risk"] <- "LOW"
-      test[test$prediction == 0,"academic.variable"] <- ""
       
-      #######################
+      ############# Features ##############
       
-      tryAddDecil <- tryCatch({
-        test <- AddDeciles(test,predictions.prob)  
-      }, warning = function(war){
-        if(!dev)
-          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+      model <- gbmFit
+      test2 <- test
+      test2 <- test2[, !( names(test2) %in% c("1","2","risk_decile","stop.out.flag.1") ) ]
+      
+      
+      BaseCase <-  subset(test2, probs == min(test2$probs))
+      BaseCase <- BaseCase[, !( names(BaseCase) %in% c("probs") ) ]
+      
+      x <- varImp(model)
+      x$feature <- rownames(x)
+      rownames(x) <- 1:nrow(x)
+      x <- x[order(-x$Overall),]
+      importances <- c()
+      for( xx in x$feature ){
+        for(i in names(test2)){
+          if(grepl(paste0("xx",i),paste0("xx",xx))){
+            importances <- c(importances, i)
+          }
+        }
+      }
+      importances <- unique(importances)
+      
+      for(use in importances){
+        test2[,paste0(use,"_base")] <- BaseCase[,use]
+        test2[ test2[,use] != BaseCase[,use], use ] <- BaseCase[,use]
         
-        test$risk_decile <- 1
-      }, error = function(err){
-        if(!dev)
-          send.email.message(paste0("Error adding decil risk on ",str),"UNP")
+        new.prob <- predict(model,test2,type = "response")
+        test2$new.prob <- new.prob
         
-        test$risk_decile <- 1
-      })
+        test2[, paste0(use,"_input")] <- round( test2$probs - test2$new.prob ,4)
+        test2$probs <- test2$new.prob
+        
+      }
+      
+      
+      
+      for(use in names(test2)){
+        if(!grepl("_input",use)){
+          test2 <- test2[, !(names(test2) %in% c(use)) ]
+        }
+      }
+      
+      test2$probability <- test$probs
+      test2$student <- rownames(test2)
+      rownames(test2) <- 1:nrow(test2)
+      
+      importances <- c()
+      for(f in names(test2)[ !(names(test2) %in% c("student","probability") )  ] ){
+        tmp <- test2[,names(test2) %in% c("student",f) ]
+        tmp$feature <- f
+        names(tmp) <- c("input","student","feature")
+        importances <- rbind(importances,tmp)
+      }
+      
+      
+      final_importances <- 
+        ddply(.data = importances, 
+              .variables = ~student, 
+              .fun = function(x){
+                
+                x <- x[order(-x$input),]
+                
+                data.frame(student = as.character(unique(x$student)), 
+                           fact1 = as.character(x$feature[1]),
+                           fact2 = as.character(x$feature[2]),
+                           fact3 = as.character(x$feature[3]),
+                           fact4 = as.character(x$feature[4]))
+                
+              })
+      
+      test$student <- rownames(test)
+      rownames(test) <- 1:nrow(test)
+      
+      export <- merge(test,final_importances, by=c("student"))
+      
+      
+      #write.csv(export, file=paste0(str,"export.csv"))
+      write.csv(test2, file=paste0("outputs/",str,"ImpFeatures.csv"))
       
       ####### Send Notification ##########
       #                                  #
       ####################################
       
-      University <- "UnP"
-      model.processed <- paste0("Week-",
-                                as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana)),
-                                "-",
-                                if(kind=="Bio") "Novo" else "Veteran",
-                                "-For-",
-                                grad)
-      high.finance <- as.character(round(subset(as.data.frame(table(test$finance.risk)), Var1 == "HIGH")$Freq/nrow(test),2)*100)
-      medium.finance <- as.character(round(subset(as.data.frame(table(test$finance.risk)), Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
-      high.academic <- as.character(round(subset(as.data.frame(table(test$academic.risk)), Var1 == "HIGH")$Freq/nrow(test),2)*100)
-      medium.academic <- as.character(round(subset(as.data.frame(table(test$academic.risk)), Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
-      risk <- as.character(round(subset(as.data.frame(table(test$general_risk)),Var1 == "HIGH")$Freq/nrow(test),2)*100)
-      safe <- as.character(round(subset(as.data.frame(table(test$general_risk)),Var1 == "MEDIUM")$Freq/nrow(test),2)*100)
-      
-      high.finance <- if(length(high.finance)==0) "0" else high.finance
-      medium.finance <- if(length(medium.finance)==0) "0" else medium.finance
-      high.academic <- if(length(high.academic)==0) "0" else high.academic
-      medium.academic <- if(length(medium.academic)==0) "0" else medium.academic
-      risk <- if(length(risk)==0) "0" else risk
-      safe <- if(length(safe)==0) "0" else safe
-      
-      print("sending notification")
-      if(!dev)
-        send.email.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)
-      
-      send.slack.model.completed(University,model.processed,high.finance,medium.finance,high.academic,medium.academic,risk,safe)  
-      
-      #### Printing output
-      print("making output")
-      
-      
-      test$student.id <- mapply(getOriginalStudentID, row.names(test))
+      test <- export
+      test$student.id <- mapply(getOriginalStudentID, test$student)
       row.names(test) <- 1:nrow(test)
-      test <- test[,!(names(test)%in%c("1","2"))]
+      test <- test[,!(names(test)%in%c("1","2","student"))]
       
       complete.data.set <- getOriginDataSet(str)
       add.fields <- names(test)[!(names(test)%in%names(complete.data.set))]
@@ -397,25 +326,43 @@ for (grad in grads) {
       test.sample <- test[,add.fields]
       test.all.fields <- merge(complete.data.set,test.sample,by = c("student.id"))
       
+      test.all.fields$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
+      test$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
+      write.csv2(test, file = paste0("outputs/",str,semesters,".csv") )
+      write.csv2(test.all.fields, file = paste0("outputs/",str,"_extended_version_",semesters,".csv") )
       
-
-      making.output <- tryCatch({
-        test.all.fields$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
-        test$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
-        write.csv2(test, file = paste0("outputs/",model.processed,semesters,".csv") )
-        write.csv2(test.all.fields, file = paste0("outputs/",model.processed,"_extended_version_",semesters,".csv") )  
-      },warning = function(war){
-        if(!dev)
-          send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
-      }, error = function(err){
-        if(!dev)
-          send.email.message("PLEASE CLOSE ANY CONNECTION WITH THE OUTPUTS RIGH NOW WE ARE TRYING TO GENERATE","UNP")
-      })
+      summary_ <- as.data.frame(round(prop.table(table(test$general_risk))*100,2))
+      
+      model.processed <- paste0("Week-",
+                                as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana)),
+                                "-",
+                                if(kind=="Bio") "Novo" else "Veteran",
+                                "-For-",
+                                grad)
+      
+      if(!dev){
+        send.email.model.completed(model.processed,
+                                   nrow(test),
+                                   subset(summary_,Var1=="RED")$Freq,
+                                   subset(summary_,Var1=="ORANGE")$Freq,
+                                   subset(summary_,Var1=="YELLOW")$Freq,
+                                   subset(summary_,Var1=="GREEN")$Freq)  
+      }
+      
+      
+      
+      send.slack.model.completed(model.processed,
+                                 nrow(test),
+                                 subset(summary_,Var1=="RED")$Freq,
+                                 subset(summary_,Var1=="ORANGE")$Freq,
+                                 subset(summary_,Var1=="YELLOW")$Freq,
+                                 subset(summary_,Var1=="GREEN")$Freq)
+      
+      
       
     }
-
-
+    
+    
   }
 }
-
-
+      

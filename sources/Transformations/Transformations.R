@@ -174,11 +174,14 @@ PayEngagement <- function(dp1,dp2,dp3,dp4,dp5,dp6,week){
 
   ##Payment 3
   penalty3 <- 0
-  dp3 <- if (is.na(dp3)) (week - 4) * days.on.week * -1 else dp3
-  if( dp3 < 0 ){
-    result <- dp3 / days.on.week / weeks.on.month
-    penalty3 <- ceiling(result * -1) * penalty.p3
+  if(week >= 5){
+    dp3 <- if (is.na(dp3)) (week - 4) * days.on.week * -1 else dp3
+    if( dp3 < 0 ){
+      result <- dp3 / days.on.week / weeks.on.month
+      penalty3 <- ceiling(result * -1) * penalty.p3
+    }
   }
+  
 
 
   ##Payment 4
@@ -219,6 +222,16 @@ PayEngagement <- function(dp1,dp2,dp3,dp4,dp5,dp6,week){
 
 
 PaymentBalance <- function(p1,p2,p3,p4,p5,p6,totalbalance){
+  
+  p1 <- as.numeric(p1)
+  p2 <- as.numeric(p2)
+  p3 <- as.numeric(p3)
+  p4 <- as.numeric(p4)
+  p5 <- as.numeric(p5)
+  p6 <- as.numeric(p6)
+  
+  totalbalance <- as.numeric(totalbalance)
+  
   p1 <- if (is.na(p1)) 0 else p1
   p2 <- if (is.na(p2)) 0 else p2
   p3 <- if (is.na(p3)) 0 else p3
@@ -1122,6 +1135,19 @@ if(nrow(PeakTecFin)>1)
 
 print("pay Engagementfor grad")
 
+
+#if(nrow(BioGrad)>1){
+#BioGrad$pay.engagement <- mapply(PayEngagement
+#, BioGrad$days.payment.1
+#, BioGrad$days.payment.2
+#                                       , BioGrad$days.payment.3
+#                                       , BioGrad$days.payment.4
+#                                       , BioGrad$days.payment.5
+#                                       , BioGrad$days.payment.6
+#                                       , 1)
+#}
+
+
 if(nrow(BioGradWeek5)>1){
   BioGradWeek5$pay.engagement <- mapply(PayEngagement
                                         , BioGradWeek5$days.payment.1
@@ -1153,7 +1179,7 @@ if(nrow(BioGradWeek13)>1)
                                         , BioGradWeek13$days.payment.5
                                         , BioGradWeek13$days.payment.6
                                         , 13)
-if(nrow(BioTecFin)>1)
+if(nrow(BioGradFin)>1)
   BioGradFin$pay.engagement <- mapply(PayEngagement
                                          , BioGradFin$days.payment.1
                                          , BioGradFin$days.payment.2
@@ -1162,6 +1188,17 @@ if(nrow(BioTecFin)>1)
                                          , BioGradFin$days.payment.5
                                          , BioGradFin$days.payment.6
                                          , 19)
+
+#if(nrow(PeakGrad)>1)
+  #PeakGrad$pay.engagement <- mapply(PayEngagement
+   #                                      , PeakGrad$days.payment.1
+    #                                     , PeakGrad$days.payment.2
+     #                                    , PeakGrad$days.payment.3
+      #                                   , PeakGrad$days.payment.4
+       #                                  , PeakGrad$days.payment.5
+        #                                 , PeakGrad$days.payment.6
+         #                                , 1)
+
 
 if(nrow(PeakGradWeek5)>1)
   PeakGradWeek5$pay.engagement <- mapply(PayEngagement
@@ -1202,6 +1239,14 @@ if(nrow(PeakGradFin)>1)
                                         , 19)
 
 
+#if(nrow(BioGrad)>1)
+ # BioGrad <- BioGrad[, !(  names(BioGrad) %in% c("days.payment.1",
+  #                                                              "days.payment.2",
+   #                                                             "days.payment.3",
+    #                                                            "days.payment.4",
+     #                                                           "days.payment.5",
+      #                                                          "days.payment.6")  )  ]
+
 
 if(nrow(BioGradWeek5)>1)
   BioGradWeek5 <- BioGradWeek5[, !(  names(BioGradWeek5) %in% c("days.payment.1",
@@ -1234,6 +1279,15 @@ if(nrow(BioGradFin)>1)
                                                 "days.payment.4",
                                                 "days.payment.5",
                                                 "days.payment.6")  )  ]
+
+#if(nrow(PeakGrad)>1)
+ # PeakGrad <- PeakGrad[, !(  names(PeakGrad) %in% c("days.payment.1",
+  #                                                                 "days.payment.2",
+   #                                                                "days.payment.3",
+    #                                                               "days.payment.4",
+     #                                                              "days.payment.5",
+      #                                                             "days.payment.6")  )  ]
+
 
 if(nrow(PeakGradWeek5)>1)
   PeakGradWeek5 <- PeakGradWeek5[, !(  names(PeakGradWeek5) %in% c("days.payment.1",
@@ -1270,6 +1324,17 @@ if(nrow(PeakGradFin)>1)
 ## PosGrad ##
 
 print("pay Engagementfor PosGrad")
+
+#if(nrow(BioPosGrad)>1)
+ # BioPosGrad$pay.engagement <- mapply(PayEngagement
+  #                                         , BioPosGrad$days.payment.1
+   #                                        , BioPosGrad$days.payment.2
+    #                                       , BioPosGrad$days.payment.3
+     #                                      , BioPosGrad$days.payment.4
+      #                                     , BioPosGrad$days.payment.5
+       #                                    , BioPosGrad$days.payment.6
+        #                                   , 1)
+
 
 if(nrow(BioPosGradWeek5)>1)
   BioPosGradWeek5$pay.engagement <- mapply(PayEngagement
@@ -1310,6 +1375,17 @@ if(nrow(BioPosGradFin)>1)
                                       , BioPosGradFin$days.payment.5
                                       , BioPosGradFin$days.payment.6
                                       , 19)
+
+
+#if(nrow(PeakPosGrad)>1)
+ # PeakPosGrad$pay.engagement <- mapply(PayEngagement
+  #                                          , PeakPosGrad$days.payment.1
+   #                                         , PeakPosGrad$days.payment.2
+    #                                        , PeakPosGrad$days.payment.3
+     #                                       , PeakPosGrad$days.payment.4
+      #                                      , PeakPosGrad$days.payment.5
+       #                                     , PeakPosGrad$days.payment.6
+        #                                    , 1)
 
 if(nrow(PeakPosGradWeek5)>1)
   PeakPosGradWeek5$pay.engagement <- mapply(PayEngagement
@@ -1352,6 +1428,14 @@ if(nrow(PeakPosGradFin)>1)
                                        , 19)
 
 
+#if(nrow(BioPosGrad)>1)
+ # BioPosGrad <- BioPosGrad[, !(  names(BioPosGrad) %in% c("days.payment.1",
+  #                                                                       "days.payment.2",
+   #                                                                      "days.payment.3",
+    #                                                                     "days.payment.4",
+     #                                                                    "days.payment.5",
+      #                                                                   "days.payment.6")  )  ]
+
 if(nrow(BioPosGradWeek5)>1)
   BioPosGradWeek5 <- BioPosGradWeek5[, !(  names(BioPosGradWeek5) %in% c("days.payment.1",
                                                 "days.payment.2",
@@ -1383,6 +1467,15 @@ if(nrow(BioPosGradFin)>1)
                                             "days.payment.4",
                                             "days.payment.5",
                                             "days.payment.6")  )  ]
+
+#if(nrow(PeakPosGrad)>1)
+ # PeakPosGrad <- PeakPosGrad[, !(  names(PeakPosGrad) %in% c("days.payment.1",
+  #                                                                          "days.payment.2",
+   #                                                                         "days.payment.3",
+    #                                                                        "days.payment.4",
+     #                                                                       "days.payment.5",
+      #                                                                      "days.payment.6")  )  ]
+
 
 if(nrow(PeakPosGradWeek5)>1)
   PeakPosGradWeek5 <- PeakPosGradWeek5[, !(  names(PeakPosGradWeek5) %in% c("days.payment.1",
@@ -1419,6 +1512,17 @@ if(nrow(PeakPosGradFin)>1)
 ## Tec ##
 
 print("pay Engagementfor Tec")
+
+#if(nrow(BioTec)>1)
+  #BioTec$pay.engagement <- mapply(PayEngagement
+   #                                    , BioTec$days.payment.1
+    #                                   , BioTec$days.payment.2
+     #                                  , BioTec$days.payment.3
+      #                                 , BioTec$days.payment.4
+       #                                , BioTec$days.payment.5
+        #                               , BioTec$days.payment.6
+         #                              , 1)
+
 
 if(nrow(BioTecWeek5)>1)
   BioTecWeek5$pay.engagement <- mapply(PayEngagement
@@ -1460,6 +1564,17 @@ if(nrow(BioTecFin)>1)
                                          , BioTecFin$days.payment.6
                                          , 19)
 
+
+#if(nrow(PeakTec)>1)
+ # PeakTec$pay.engagement <- mapply(PayEngagement
+  #                                      , PeakTec$days.payment.1
+   #                                     , PeakTec$days.payment.2
+    #                                    , PeakTec$days.payment.3
+     #                                   , PeakTec$days.payment.4
+      #                                  , PeakTec$days.payment.5
+       #                                 , PeakTec$days.payment.6
+        #                                , 1)
+
 if(nrow(PeakTecWeek5)>1)
   PeakTecWeek5$pay.engagement <- mapply(PayEngagement
                                             , PeakTecWeek5$days.payment.1
@@ -1500,7 +1615,13 @@ if(nrow(PeakTecFin)>1)
                                           , PeakTecFin$days.payment.6
                                           , 19)
 
-
+if(nrow(BioTec)>1)
+  BioTec <- BioTec[, !(  names(BioTec) %in% c("days.payment.1",
+                                                             "days.payment.2",
+                                                             "days.payment.3",
+                                                             "days.payment.4",
+                                                             "days.payment.5",
+                                                             "days.payment.6")  )  ]
 
 if(nrow(BioTecWeek5)>1)
   BioTecWeek5 <- BioTecWeek5[, !(  names(BioTecWeek5) %in% c("days.payment.1",
@@ -1533,6 +1654,14 @@ if(nrow(BioTecFin)>1)
                                           "days.payment.4",
                                           "days.payment.5",
                                           "days.payment.6")  )  ]
+
+if(nrow(PeakTec)>1)
+  PeakTec <- PeakTec[, !(  names(PeakTec) %in% c("days.payment.1",
+                                                                "days.payment.2",
+                                                                "days.payment.3",
+                                                                "days.payment.4",
+                                                                "days.payment.5",
+                                                                "days.payment.6")  )  ]
 
 if(nrow(PeakTecWeek5)>1)
   PeakTecWeek5 <- PeakTecWeek5[, !(  names(PeakTecWeek5) %in% c("days.payment.1",
@@ -1654,6 +1783,15 @@ if(nrow(PeakGradFin)>1)
   PeakGradFin$payment.amount.6,
   PeakGradFin$total.balance)
 
+if(nrow(BioGrad)>1)
+  BioGrad <- BioGrad[, !(  names(BioGrad) %in% c("payment.amount.1",
+                                                                "payment.amount.2",
+                                                                "payment.amount.3",
+                                                                "payment.amount.4",
+                                                                "payment.amount.5",
+                                                                "payment.amount.6",
+                                                                "total.balance"))]
+
 if(nrow(BioGradWeek5)>1)
   BioGradWeek5 <- BioGradWeek5[, !(  names(BioGradWeek5) %in% c("payment.amount.1",
   "payment.amount.2",
@@ -1689,6 +1827,15 @@ if(nrow(BioGradFin)>1)
   "payment.amount.5",
   "payment.amount.6",
   "total.balance"))]
+
+if(nrow(PeakGrad)>1)
+  PeakGrad <- PeakGrad[, !(  names(PeakGrad) %in% c("payment.amount.1",
+                                                                   "payment.amount.2",
+                                                                   "payment.amount.3",
+                                                                   "payment.amount.4",
+                                                                   "payment.amount.5",
+                                                                   "payment.amount.6",
+                                                                   "total.balance"))]
 
 if(nrow(PeakGradWeek5)>1)
   PeakGradWeek5 <- PeakGradWeek5[, !(  names(PeakGradWeek5) %in% c("payment.amount.1",
@@ -1810,6 +1957,15 @@ if(nrow(PeakPosGradFin)>1)
   PeakPosGradFin$payment.amount.6,
   PeakPosGradFin$total.balance)
 
+if(nrow(BioPosGrad)>1)
+  BioPosGrad <- BioPosGrad[, !(  names(BioPosGrad) %in% c("payment.amount.1",
+                                                                         "payment.amount.2",
+                                                                         "payment.amount.3",
+                                                                         "payment.amount.4",
+                                                                         "payment.amount.5",
+                                                                         "payment.amount.6",
+                                                                         "total.balance"))]
+
 if(nrow(BioPosGradWeek5)>1)
   BioPosGradWeek5 <- BioPosGradWeek5[, !(  names(BioPosGradWeek5) %in% c("payment.amount.1",
   "payment.amount.2",
@@ -1845,6 +2001,15 @@ if(nrow(BioPosGradFin)>1)
   "payment.amount.5",
   "payment.amount.6",
   "total.balance"))]
+
+if(nrow(PeakPosGrad)>1)
+  PeakPosGrad <- PeakPosGrad[, !(  names(PeakPosGrad) %in% c("payment.amount.1",
+                                                                            "payment.amount.2",
+                                                                            "payment.amount.3",
+                                                                            "payment.amount.4",
+                                                                            "payment.amount.5",
+                                                                            "payment.amount.6",
+                                                                            "total.balance"))]
 
 if(nrow(PeakPosGradWeek5)>1)
   PeakPosGradWeek5 <- PeakPosGradWeek5[, !(  names(PeakPosGradWeek5) %in% c("payment.amount.1",
@@ -1966,6 +2131,15 @@ if(nrow(PeakTecFin)>1)
   PeakTecFin$payment.amount.6,
   PeakTecFin$total.balance)
 
+if(nrow(BioTec)>1)
+  BioTec <- BioTec[, !(  names(BioTec) %in% c("payment.amount.1",
+                                                             "payment.amount.2",
+                                                             "payment.amount.3",
+                                                             "payment.amount.4",
+                                                             "payment.amount.5",
+                                                             "payment.amount.6",
+                                                             "total.balance"))]
+
 if(nrow(BioTecWeek5)>1)
   BioTecWeek5 <- BioTecWeek5[, !(  names(BioTecWeek5) %in% c("payment.amount.1",
   "payment.amount.2",
@@ -2001,6 +2175,15 @@ if(nrow(BioTecFin)>1)
   "payment.amount.5",
   "payment.amount.6",
   "total.balance"))]
+
+if(nrow(PeakTec)>1)
+  PeakTec <- PeakTec[, !(  names(PeakTec) %in% c("payment.amount.1",
+                                                                "payment.amount.2",
+                                                                "payment.amount.3",
+                                                                "payment.amount.4",
+                                                                "payment.amount.5",
+                                                                "payment.amount.6",
+                                                                "total.balance"))]
 
 if(nrow(PeakTecWeek5)>1)
   PeakTecWeek5 <- PeakTecWeek5[, !(  names(PeakTecWeek5) %in% c("payment.amount.1",
@@ -2336,28 +2519,43 @@ if(nrow(PeakTecFin)>1)
   PeakTecFin <- PeakTecFin[, !(  names(PeakTecFin) %in% drop.to.veteran )]
 
 ### dropping grades from w5 and w9
-
+if(nrow(BioGrad)>1)
+  BioGrad <- BioGrad[, !( names(BioGrad) %in% c("notas","frequencia") )]
 if(nrow(BioGradWeek5)>1)
   BioGradWeek5 <- BioGradWeek5[, !( names(BioGradWeek5) %in% c("notas","frequencia") )]
 if(nrow(BioGradWeek9)>1)
   BioGradWeek9 <- BioGradWeek9[, !( names(BioGradWeek9) %in% c("notas","frequencia") )]
+
+if(nrow(BioPosGrad)>1)
+  BioPosGrad <- BioPosGrad[, !( names(BioPosGrad) %in% c("notas","frequencia") )]
 if(nrow(BioPosGradWeek5)>1)
   BioPosGradWeek5 <- BioPosGradWeek5[, !( names(BioPosGradWeek5) %in% c("notas","frequencia") )]
 if(nrow(BioPosGradWeek9)>1)
   BioPosGradWeek9 <- BioPosGradWeek9[, !( names(BioPosGradWeek9) %in% c("notas","frequencia") )]
+
+if(nrow(BioTec)>1)
+  BioTec <- BioTec[, !( names(BioTec) %in% c("notas","frequencia") )]
 if(nrow(BioTecWeek5)>1)
   BioTecWeek5 <- BioTecWeek5[, !( names(BioTecWeek5) %in% c("notas","frequencia") )]
 if(nrow(BioTecWeek9)>1)
   BioTecWeek9 <- BioTecWeek9[, !( names(BioTecWeek9) %in% c("notas","frequencia") )]
 
+if(nrow(PeakGrad)>1)
+  PeakGrad <- PeakGrad[, !( names(PeakGrad) %in% c("notas","frequencia") )]
 if(nrow(PeakGradWeek5)>1)
   PeakGradWeek5 <- PeakGradWeek5[, !( names(PeakGradWeek5) %in% c("notas","frequencia") )]
 if(nrow(PeakGradWeek9)>1)
   PeakGradWeek9 <- PeakGradWeek9[, !( names(PeakGradWeek9) %in% c("notas","frequencia") )]
+
+if(nrow(PeakPosGrad)>1)
+  PeakPosGrad <- PeakPosGrad[, !( names(PeakPosGrad) %in% c("notas","frequencia") )]
 if(nrow(PeakPosGradWeek5)>1)
   PeakPosGradWeek5 <- PeakPosGradWeek5[, !( names(PeakPosGradWeek5) %in% c("notas","frequencia") )]
 if(nrow(PeakPosGradWeek9)>1)
   PeakPosGradWeek9 <- PeakPosGradWeek9[, !( names(PeakPosGradWeek9) %in% c("notas","frequencia") )]
+
+if(nrow(PeakTec)>1)
+  PeakTec <- PeakTec[, !( names(PeakTec) %in% c("notas","frequencia") )]
 if(nrow(PeakTecWeek5)>1)
   PeakTecWeek5 <- PeakTecWeek5[, !( names(PeakTecWeek5) %in% c("notas","frequencia") )]
 if(nrow(PeakTecWeek9)>1)

@@ -1,20 +1,16 @@
-send.email.model.completed <- function(university,
-                                       model,
-                                       high_finance,
-                                       medium_finance,
-                                       high_academic,
-                                       medium_academic,
-                                       risk,
-                                       safe){
+send.email.model.completed <- function(model,
+                                       number,
+                                       red,
+                                       orange,
+                                       yellow,
+                                       green){
   send_email <- paste0("https://mbi-laureate.appspot.com/prediction/send/",
-                       university,"/",
                        model,"/",
-                       high_finance,"/",
-                       medium_finance,"/",
-                       high_academic,"/",
-                       medium_academic,"/",
-                       risk,"/",
-                       safe)
+                       number,"/",
+                       red,"/",
+                       orange,"/",
+                       yellow,"/",
+                       green)
   
   print(send_email)
   
@@ -24,23 +20,19 @@ send.email.model.completed <- function(university,
   
 }
 
-send.slack.model.completed <- function(university,
-                                       model,
-                                       high_finance,
-                                       medium_finance,
-                                       high_academic,
-                                       medium_academic,
-                                       risk,
-                                       safe){
+send.slack.model.completed <- function(model,
+                                       number,
+                                       red,
+                                       orange,
+                                       yellow,
+                                       green){
   send_email <- paste0("https://mbi-laureate.appspot.com/slack/send/",
-                       university,"/",
                        model,"/",
-                       high_finance,"/",
-                       medium_finance,"/",
-                       high_academic,"/",
-                       medium_academic,"/",
-                       risk,"/",
-                       safe)
+                       number,"/",
+                       red,"/",
+                       orange,"/",
+                       yellow,"/",
+                       green)
   
   print(send_email)
   
@@ -80,3 +72,9 @@ send.email.message <- function(message,university){
   load <- fromJSON(url)
   print(load)
 }
+
+list.of.packages <- c("plyr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+

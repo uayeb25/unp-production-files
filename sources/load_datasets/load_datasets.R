@@ -78,6 +78,9 @@ load.data <-  function(semesters){
       tmp$grado <- grado
       names(tmp) <- tolower(names(tmp))
       print(name)
+      
+      
+      
       AllWeek <- rbind(AllWeek,tmp)
       print("Completed!")
     }
@@ -88,7 +91,7 @@ load.data <-  function(semesters){
   main.data.frames@AllFim <- main.data.frames@AllFim[,!(names(main.data.frames@AllFim)%in%c("stop.out.flag.1"))]
   main.data.frames@AllBio <- main.data.frames@AllBio[,!(names(main.data.frames@AllBio)%in%c("stop.out.flag.1"))]
   main.data.frames@AllWeek <- main.data.frames@AllWeek[,!(names(main.data.frames@AllWeek)%in%c("stop.out.flag.1"))]
-
+  
   main.data.frames <- new("MainClasses",
                           AllPeak = AllPeak,
                           AllFim = AllFim,

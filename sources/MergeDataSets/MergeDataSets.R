@@ -66,11 +66,13 @@ SplitDataSet <- function(semesters,main.data.frames){
   BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
 
   BioGrad <- subset(AllBio, grado == my.grado)
+  #BioGradWeek1 <- subset(BioWeeks, semana == 0)
   BioGradWeek5 <- subset(BioWeeks, semana == 5)
   BioGradWeek9 <- subset(BioWeeks, semana == 9)
   BioGradWeek13 <- subset(BioWeeks, semana == 13)
   BioGradFin <- subset(BioWeeks, semana == 19)
-
+  
+  #BioGradWeek1 <- merge(BioGradWeek1,BioGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioGradWeek5 <- merge(BioGradWeek5,BioGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioGradWeek9 <- merge(BioGradWeek9,BioGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioGradWeek13 <- merge(BioGradWeek13,BioGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
@@ -89,11 +91,13 @@ SplitDataSet <- function(semesters,main.data.frames){
   PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
 
   PeakGrad <- subset(AllPeak, grado == my.grado)
+  #PeakGradWeek1 <- subset(PeakWeeks, semana == 0)
   PeakGradWeek5 <- subset(PeakWeeks, semana == 5)
   PeakGradWeek9 <- subset(PeakWeeks, semana == 9)
   PeakGradWeek13 <- subset(PeakWeeks, semana == 13)
   PeakGradFin <- subset(PeakWeeks, semana == 19)
 
+  #PeakGradWeek1 <- merge(PeakGradWeek1,PeakGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakGradWeek5 <- merge(PeakGradWeek5,PeakGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakGradWeek9 <- merge(PeakGradWeek9,PeakGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakGradWeek13 <- merge(PeakGradWeek13,PeakGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
@@ -117,11 +121,13 @@ SplitDataSet <- function(semesters,main.data.frames){
   BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
 
   BioTec <- subset(AllBio, grado == my.grado)
+  #BioTecWeek1 <- subset(BioWeeks, semana == 0)
   BioTecWeek5 <- subset(BioWeeks, semana == 5)
   BioTecWeek9 <- subset(BioWeeks, semana == 9)
   BioTecWeek13 <- subset(BioWeeks, semana == 13)
   BioTecFin <- subset(BioWeeks, semana == 19)
 
+  #BioTecWeek1 <- merge(BioTecWeek1,BioTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioTecWeek5 <- merge(BioTecWeek5,BioTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioTecWeek9 <- merge(BioTecWeek9,BioTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioTecWeek13 <- merge(BioTecWeek13,BioTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
@@ -139,11 +145,13 @@ SplitDataSet <- function(semesters,main.data.frames){
   PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
 
   PeakTec <- subset(AllPeak, grado == my.grado)
+  #PeakTecWeek1 <- subset(PeakWeeks, semana == 0)
   PeakTecWeek5 <- subset(PeakWeeks, semana == 5)
   PeakTecWeek9 <- subset(PeakWeeks, semana == 9)
   PeakTecWeek13 <- subset(PeakWeeks, semana == 13)
   PeakTecFin <- subset(PeakWeeks, semana == 19)
 
+  #PeakTecWeek1 <- merge(PeakTecWeek1,PeakTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakTecWeek5 <- merge(PeakTecWeek5,PeakTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakTecWeek9 <- merge(PeakTecWeek9,PeakTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakTecWeek13 <- merge(PeakTecWeek13,PeakTec, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
@@ -168,11 +176,13 @@ SplitDataSet <- function(semesters,main.data.frames){
   BioWeeks$semana <- mapply(setWeek,nFin,BioWeeks$semana)
 
   BioPosGrad <- subset(AllBio, grado == my.grado)
+  #BioPosGradWeek1 <- subset(BioWeeks, semana == 0)
   BioPosGradWeek5 <- subset(BioWeeks, semana == 5)
   BioPosGradWeek9 <- subset(BioWeeks, semana == 9)
   BioPosGradWeek13 <- subset(BioWeeks, semana == 13)
   BioPosGradFin <- subset(BioWeeks, semana == 19)
 
+  #BioPosGradWeek1 <- merge(BioPosGradWeek1,BioPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioPosGradWeek5 <- merge(BioPosGradWeek5,BioPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioPosGradWeek9 <- merge(BioPosGradWeek9,BioPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
   BioPosGradWeek13 <- merge(BioPosGradWeek13,BioPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado","block"))
@@ -190,17 +200,27 @@ SplitDataSet <- function(semesters,main.data.frames){
   PeakWeeks$semana <- mapply(setWeek,nFin,PeakWeeks$semana)
 
   PeakPosGrad <- subset(AllPeak, grado == my.grado)
+  #PeakPosGradWeek1 <- subset(PeakWeeks, semana == 0)
   PeakPosGradWeek5 <- subset(PeakWeeks, semana == 5)
   PeakPosGradWeek9 <- subset(PeakWeeks, semana == 9)
   PeakPosGradWeek13 <- subset(PeakWeeks, semana == 13)
   PeakPosGradFin <- subset(PeakWeeks, semana == 19)
 
+  #PeakPosGradWeek1 <- merge(PeakPosGradWeek1,PeakPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakPosGradWeek5 <- merge(PeakPosGradWeek5,PeakPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakPosGradWeek9 <- merge(PeakPosGradWeek9,PeakPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakPosGradWeek13 <- merge(PeakPosGradWeek13,PeakPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakPosGradFin <- merge(PeakPosGradFin,PeakPosGrad, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
   PeakPosGradFin <- merge(PeakPosGradFin,Fim, by=c("student.id","academic.cycle","stop.out.flag.1","grado"))
 
+  #BioPosGrad <- BioPosGradWeek1[ ,!(names(BioPosGradWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  #PeakPosGrad <- PeakPosGradWeek1[ ,!(names(PeakPosGradWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  #BioGrad <- BioGradWeek1[ ,!(names(BioGradWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  #PeakGrad <- PeakGradWeek1[ ,!(names(PeakGradWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  #BioTec <- BioTecWeek1[ ,!(names(BioTecWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  #PeakTec <- PeakTecWeek1[ ,!(names(PeakTecWeek1) %in% c("peak.date","notas","frecuencia")) ]
+  
+  
   all.data.set@BioGrad <- BioGrad
   all.data.set@BioGradWeek5 <- BioGradWeek5
   all.data.set@BioGradWeek9 <- BioGradWeek9
