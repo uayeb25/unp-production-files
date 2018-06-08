@@ -1,104 +1,59 @@
-load.data <-  function(semesters){
+setBase("files")
+
+degrees <- c("Grad","Tec","PosGrad")
+folders <- c("Bio","Fim","Peak","Semanal_","Notas")
+
+for (f in folders){
   
+  assign(paste0("df.",f), c(""))
   
-  grados <- c("Grad","Tec","PosGrad")
-  
-  
-  setBase("files")
-  AllBio <- c()
-  kind <- "BioIngressantes"
-  for( grado in grados ){
-    for( semester in semesters ){
-      name <- paste0(grado,kind,"_",semester,".csv")
-      tmp <- read.csv2( name,
-                        sep = ";",
-                        fileEncoding = "ISO-8859-2",
-                        na.strings = c("NA","N/A","NULL")  )
-      tmp$grado <- grado
-      names(tmp) <- tolower(names(tmp))
-      if(grado == "PosGrad"){
-        names(tmp) <- names(AllBio)
-      }
-      print(name)
-      AllBio <- rbind(AllBio,tmp)
-      print("Completed!")
-    }
+  for (a in Sys.glob(paste0("*.csv"))){
+    tmp <- read.csv2(a, header = T, dec = ".", sep = ";",
+                   fileEncoding = "ISO-8859-2",
+                   na.strings = c("NA","N/A","NULL"))
+    
+    names(tmp) <- tolower(names(tmp))
+    tmp$degree <- substr(a,1,3)
+    
+    if (regexpr(f,a) > 0) 
+    {assign(paste0("df.",f),rbind(get(paste0("df.",f)),tmp))}
   }
-  
-  
-  
-  setBase("files")
-  AllFim <- c()
-  
-  kind <- "FimSemestre"
-  for( grado in grados ){
-    for( semester in semesters ){
-      name <- paste0(grado,kind,"_",semester,".csv")
-      tmp <- read.csv2( name,
-                        sep = ";",
-                        fileEncoding = "ISO-8859-2",
-                        na.strings = c("NA","N/A","NULL")  )
-      tmp$grado <- grado
-      names(tmp) <- tolower(names(tmp))
-      print(name)
-      AllFim <- rbind(AllFim,tmp)
-      print("Completed!")
-    }
-  }
-  
-  setBase("files")
-  AllPeak <- c()
-  kind <- "PeakSemestre"
-  for( grado in grados ){
-    for( semester in semesters ){
-      name <- paste0(grado,kind,"_",semester,".csv")
-      tmp <- read.csv2( name,
-                        sep = ";",
-                        fileEncoding = "ISO-8859-2",
-                        na.strings = c("NA","N/A","NULL")  )
-      tmp$grado <- grado
-      names(tmp) <- tolower(names(tmp))
-      print(name)
-      AllPeak <- rbind(AllPeak,tmp)
-      print("Completed!")
-    }
-  }
-  
-  
-  setBase("files")
-  AllWeek <- c()
-  kind <- "Semanal"
-  for( grado in grados ){
-    for( semester in semesters ){
-      name <- paste0(grado,kind,"_",semester,".csv")
-      tmp <- read.csv2( name,
-                        sep = ";",
-                        fileEncoding = "ISO-8859-2",
-                        na.strings = c("NA","N/A","NULL")  )
-      tmp$grado <- grado
-      names(tmp) <- tolower(names(tmp))
-      print(name)
-      
-      
-      
-      AllWeek <- rbind(AllWeek,tmp)
-      print("Completed!")
-    }
-  }
-  
-  #Drop stop.out.flag 
-  main.data.frames@AllPeak <- main.data.frames@AllPeak[,!(names(main.data.frames@AllPeak)%in%c("stop.out.flag.1"))]
-  main.data.frames@AllFim <- main.data.frames@AllFim[,!(names(main.data.frames@AllFim)%in%c("stop.out.flag.1"))]
-  main.data.frames@AllBio <- main.data.frames@AllBio[,!(names(main.data.frames@AllBio)%in%c("stop.out.flag.1"))]
-  main.data.frames@AllWeek <- main.data.frames@AllWeek[,!(names(main.data.frames@AllWeek)%in%c("stop.out.flag.1"))]
-  
-  main.data.frames <- new("MainClasses",
-                          AllPeak = AllPeak,
-                          AllFim = AllFim,
-                          AllBio = AllBio,
-                          AllWeek = AllWeek)
-  
-  main.data.frames
+
 }
 
+df.Semanal <- df.Semanal_
+df.Fin <- df.Fim
+df.Fim <- NULL
+remove(df.Semanal_)
+remove(tmp)
 
+nFim <- ifelse(is.null(nrow(df.Fin)),0,nrow(df.Fin))
+
+### Function to update the week in the right model ###
+
+setWeek <- function(nFim,week){
+  
+  my.week <- 
+    ifelse(week >= 1 & week <= 4,0,
+           ifelse(week >= 5 & week <= 8,5,
+                  ifelse(week >= 9 & week <= 12,9,
+                         ifelse(nFim > 1 & week >= 19,19,13))))
+  
+  my.week
+  
+}
+
+current.week <- ddply(df.Semanal,"degree", summarise,max.semana  = max(semana))
+current.week <- current.week[current.week$degree != "",]
+current.week$degree <- gsub("Pos","PosGrad",gsub("Gra","Grad",current.week$degree))
+
+df.Semanal$semana <- setWeek(nFim,df.Semanal$semana)
+
+
+
+
+for (d in ls(pattern = "df")){
+  
+  assign(d,get(d)[get(d)["student.id"] != "",])
+
+}

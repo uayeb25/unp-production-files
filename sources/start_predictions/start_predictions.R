@@ -1,73 +1,7 @@
-library(caret)
-library(plyr)
+getOriginDataSet <- function(dataset){
+  my.dataset <- get(dataset)
+  my.dataset}
 
-
-getOriginDataSet <- function(dataset.name){
-  
-  if(dataset.name == "BioGrad")
-    my.dataset <- all.data.set@BioGrad
-  if(dataset.name == "BioGradWeek5")
-    my.dataset <- all.data.set@BioGradWeek5
-  if(dataset.name == "BioGradWeek9")
-    my.dataset <- all.data.set@BioGradWeek9
-  if(dataset.name == "BioGradWeek13")
-    my.dataset <- all.data.set@BioGradWeek13
-  if(dataset.name == "BioGradFin")
-    my.dataset <- all.data.set@BioGradFin
-  if(dataset.name == "PeakGrad")
-    my.dataset <- all.data.set@PeakGrad
-  if(dataset.name == "PeakGradWeek5")
-    my.dataset <- all.data.set@PeakGradWeek5
-  if(dataset.name == "PeakGradWeek9")
-    my.dataset <- all.data.set@PeakGradWeek9
-  if(dataset.name == "PeakGradWeek13")
-    my.dataset <- all.data.set@PeakGradWeek13
-  if(dataset.name == "PeakGradFin")
-    my.dataset <- all.data.set@PeakGradFin
-  if(dataset.name == "BioPosGrad")
-    my.dataset <- all.data.set@BioPosGrad
-  if(dataset.name == "BioPosGradWeek5")
-    my.dataset <- all.data.set@BioPosGradWeek5
-  if(dataset.name == "BioPosGradWeek9")
-    my.dataset <- all.data.set@BioPosGradWeek9
-  if(dataset.name == "BioPosGradWeek13")
-    my.dataset <- all.data.set@BioPosGradWeek13
-  if(dataset.name == "BioPosGradFin")
-    my.dataset <- all.data.set@BioPosGradFin
-  if(dataset.name == "PeakPosGrad")
-    my.dataset <- all.data.set@PeakPosGrad
-  if(dataset.name == "PeakPosGradWeek5")
-    my.dataset <- all.data.set@PeakPosGradWeek5
-  if(dataset.name == "PeakPosGradWeek9")
-    my.dataset <- all.data.set@PeakPosGradWeek9
-  if(dataset.name == "PeakPosGradWeek13")
-    my.dataset <- all.data.set@PeakPosGradWeek13
-  if(dataset.name == "PeakPosGradFin")
-    my.dataset <- all.data.set@PeakPosGradFin
-  if(dataset.name == "BioTec")
-    my.dataset <- all.data.set@BioTec
-  if(dataset.name == "BioTecWeek5")
-    my.dataset <- all.data.set@BioTecWeek5
-  if(dataset.name == "BioTecWeek9")
-    my.dataset <- all.data.set@BioTecWeek9
-  if(dataset.name == "BioTecWeek13")
-    my.dataset <- all.data.set@BioTecWeek13
-  if(dataset.name == "BioTecFin")
-    my.dataset <- all.data.set@BioTecFin
-  if(dataset.name == "PeakTec")
-    my.dataset <- all.data.set@PeakTec
-  if(dataset.name == "PeakTecWeek5")
-    my.dataset <- all.data.set@PeakTecWeek5
-  if(dataset.name == "PeakTecWeek9")
-    my.dataset <- all.data.set@PeakTecWeek9
-  if(dataset.name == "PeakTecWeek13")
-    my.dataset <- all.data.set@PeakTecWeek13
-  if(dataset.name == "PeakTecFin")
-    my.dataset <- all.data.set@PeakTecFin
-  
-  my.dataset
-  
-}
 
 getOriginalStudentID <- function(string){
   string <- trim(string)
@@ -113,6 +47,80 @@ AddDeciles <- function(data.set){
 }
 
 
+dic <- read.csv2("dictionary.csv",header = T, sep = ";")
+
+dic$type <- ifelse(dic$vars %in% 
+                     c(
+                       "days.payment.1"
+                       ,"days.payment.2"
+                       ,"days.payment.3"
+                       ,"days.payment.4"
+                       ,"days.payment.5"
+                       ,"days.payment.6"
+                       ,"payment.amount.1"
+                       ,"payment.amount.2"
+                       ,"payment.amount.3"
+                       ,"payment.amount.4"
+                       ,"payment.amount.5"
+                       ,"payment.amount.6"
+                       ,"payment.balance"
+                       ,"num.academic.cycles"
+                       ,"num.academic.cycles.continuing"
+                       ,"num.disciplinas.matriculado"
+                       ,"cummulative.credits.attempted.last"
+                       ,"cummulative.credits.earned.last"
+                       ,"cummulative.gpa.last"
+                       ,"first.year.cummulative.gpa"
+                       ,"academic.period.gpa.last"
+                       ,"age"
+                       ,"enrollment.days"
+                       ,"enrollment.year"
+                       ,"failed.courses.last"
+                       ,"frequencia"
+                       ,"notas"
+                       ,"pay.engagement"
+                       ,"scholarship.months"
+                       ,"total.balance"
+                       ,"credits.aggregation"
+                       ,"failed.courses"
+                       ,"final.mean"
+                       ,"mean.sucesso.final"
+                       ,"mean.sucesso.local"
+                       ,"num.disciplinas"
+                       ,"sum.bin.recup"
+                       ,"total.creditos"
+                       ,"total.disciplinas"
+                       ,"total.creditos.matriculado"
+                       ,"academic.period.gpa"
+                       ,"years.to.enter"
+                       ,"enem.score"
+                       ,"high.school.graduation.year"
+                       ,"vest.score"
+                     ), "numeric","factor")
+
+
+models.list <- c(ls(pattern = "Bio"),ls(pattern = "Peak"))
+colnames(dic) <- c("vars","type",models.list)
+
+for(d in models.list){
+  
+  df.tmp <- as.data.frame(get(d))
+  
+  for (i in dic[dic[names(dic) == d]== 1,"vars"]){
+    
+    ifelse(dic[dic$vars == i,2] == "numeric", 
+           df.tmp[i] <- as.data.frame(as.numeric(unlist(df.tmp[,names(df.tmp) == i]))),
+           df.tmp[i] <- as.data.frame(as.factor(unlist(df.tmp[,names(df.tmp) == i]))))
+    
+    ifelse(is.na(df.tmp[i]),0,df.tmp[i])
+    
+  }
+  
+  assign(d,df.tmp)
+  
+}
+
+
 #############################
 
 my.env <- environment()
@@ -122,10 +130,9 @@ grads <- c("Grad","PosGrad","Tec")
 kinds <- c("Bio","Peak")
 
 
-
 for (grad in grads) {
   for (kind in kinds) {
-    
+  
     
     
     ###### check which model should to use ####
@@ -139,33 +146,33 @@ for (grad in grads) {
     ####################
     
     ##### Choose model #####
-    str <- paste0(kind,grad)
+    string <- paste0(kind,grad)
     
     try.with <- c("Week5","Week9","Week13","Fin")
     model <- ""
     for (i.want.try.with in try.with) {
       
-      try.now <- get(paste0(str,i.want.try.with),envir = my.env)
+      try.now <- as.data.frame(get(paste0(string,i.want.try.with)))#,envir = my.env))
       if(nrow(try.now)>1)
         model <- i.want.try.with
     }
     
-    str <- paste0(str,model)
+    string <- paste0(string,model)
     
     #######################
-    print(paste0("predicting for ",str))
+    print(paste0("predicting for ",string))
     
     
-    model_text <- paste0("model_",str)
-    if( need_model_update(model_text)){
+    model_text <- paste0("model_",string)
+    if(need_model_update(model_text)){
       download_unp_model(model_text,"models",".RData")
       update_model(model_text,"0")
       send.slack.notification.model.downloaded(model_text)
     }
     
     load(paste0("models_gbm/",model_text,".RData"))
-    test <- get(str, envir = my.env)
     
+    test <- get(string)#, envir = my.env)
     
     #### cast variables ####
     
@@ -176,44 +183,44 @@ for (grad in grads) {
     }
     
     
-    int.vars <- names(test)[names(test)%in%gbmFit$coefnames]
-    for (int.var in int.vars[!(int.vars%in%no.count)] ) {
-      test[,int.var] <- as.numeric(test[,int.var])
-    }
-    
-    factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","scholarship.months")
-    for (coln in colnames(test)) {
-      for (fv in factor.variable) {
-        if(coln == fv & !(str %in% c("PeakGrad","PeakGradWeek5","PeakGradWeek9","PeakGradWeek13","PeakGradFin",
-                                     "PeakPosGrad","PeakPosGradWeek5","PeakPosGradWeek9","PeakPosGradWeek13","PeakPosGradFin",
-                                     "PeakTec","PeakTecWeek5","PeakTecWeek9","PeakTecWeek13","PeakTecFin")) ){
-          test[,coln] <- as.factor(test[,coln])
-        }
-      }
-    }
-    
-    factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","prouni.flag","scholarship.months")
-    for (coln in colnames(test)) {
-      for (fv in factor.variable) {
-        if(coln == fv & !(str %in% c("PeakGrad","PeakGradWeek5","PeakGradWeek9","PeakGradWeek13","PeakGradFin",
-                                     "PeakPosGrad","PeakPosGradWeek5","PeakPosGradWeek9","PeakPosGradWeek13","PeakPosGradFin",
-                                     "PeakTec","PeakTecWeek5","PeakTecWeek9","PeakTecWeek13","PeakTecFin")) ){
-          test[,coln] <- as.factor(test[,coln])
-        }
-      }
-    }
-	
-	factor.variable <- c("frequencia","other.financial.aid.flag")
-    for (coln in colnames(test)) {
-      for (fv in factor.variable) {
-        if(coln == fv){
-          test[,coln] <- as.numeric(test[,coln])
-        }
-      }
-    }
-    
-    
-    
+#     int.vars <- names(test)[names(test)%in%gbmFit$coefnames]
+#     for (int.var in int.vars[!(int.vars%in%no.count)] ) {
+#       test[,int.var] <- as.numeric(test[,int.var])
+#     }
+#     
+#     factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","scholarship.months")
+#     for (coln in colnames(test)) {
+#       for (fv in factor.variable) {
+#         if(coln == fv & !(string %in% c("PeakGrad","PeakGradWeek5","PeakGradWeek9","PeakGradWeek13","PeakGradFin",
+#                                      "PeakPosGrad","PeakPosGradWeek5","PeakPosGradWeek9","PeakPosGradWeek13","PeakPosGradFin",
+#                                      "PeakTec","PeakTecWeek5","PeakTecWeek9","PeakTecWeek13","PeakTecFin")) ){
+#           test[,coln] <- as.factor(test[,coln])
+#         }
+#       }
+#     }
+#     
+#     factor.variable <- c("other.financial.aid.flag","worker.flag","fies.flag","prouni.flag","scholarship.months")
+#     for (coln in colnames(test)) {
+#       for (fv in factor.variable) {
+#         if(coln == fv & !(string %in% c("PeakGrad","PeakGradWeek5","PeakGradWeek9","PeakGradWeek13","PeakGradFin",
+#                                      "PeakPosGrad","PeakPosGradWeek5","PeakPosGradWeek9","PeakPosGradWeek13","PeakPosGradFin",
+#                                      "PeakTec","PeakTecWeek5","PeakTecWeek9","PeakTecWeek13","PeakTecFin")) ){
+#           test[,coln] <- as.factor(test[,coln])
+#         }
+#       }
+#     }
+# 	
+# 	factor.variable <- c("frequencia","other.financial.aid.flag")
+#     for (coln in colnames(test)) {
+#       for (fv in factor.variable) {
+#         if(coln == fv){
+#           test[,coln] <- as.numeric(test[,coln])
+#         }
+#       }
+#     }
+#     
+#     
+#     
     #### Predictions        ####
     #                          #
     ############################
@@ -235,21 +242,9 @@ for (grad in grads) {
 	    
 	  }
 	
-	
-	if( sum(test$schedule %in% c("DIURNO") ) > 0 && grad == "Tec"  ){
-	  
-	  test <- test[!(test$schedule == "DIURNO"),]
-	  test$schedule <- as.character(test$schedule)
-	  test$schedule <- as.factor(test$schedule)
-	  
-	}
-	
 	  
     
     predictions.prob <- predict(gbmFit,test,type="response")
-    
-    
-    
     
     
     if(continue){
@@ -291,7 +286,7 @@ for (grad in grads) {
       
       for(use in importances){
         test2[,paste0(use,"_base")] <- BaseCase[,use]
-        test2[ test2[,use] != BaseCase[,use], use ] <- BaseCase[,use]
+        if(!is.na(BaseCase[,use])){test2[ test2[,use] != BaseCase[,use], use ] <- BaseCase[,use]}
         
         new.prob <- predict(model,test2,type = "response")
         test2$new.prob <- new.prob
@@ -336,15 +331,15 @@ for (grad in grads) {
                            fact4 = as.character(x$feature[4]))
                 
               })
-      
+
       test$student <- rownames(test)
       rownames(test) <- 1:nrow(test)
       
       export <- merge(test,final_importances, by=c("student"))
+      head(export)
       
-      
-      #write.csv(export, file=paste0(str,"export.csv"))
-      write.csv(test2, file=paste0("outputs/",str,"ImpFeatures.csv"))
+      #write.csv(export, file=paste0(string,"export.csv"))
+      write.csv(test2, file=paste0("outputs/",string,"ImpFeatures.csv"))
       
       ####### Send Notification ##########
       #                                  #
@@ -355,38 +350,38 @@ for (grad in grads) {
       row.names(test) <- 1:nrow(test)
       test <- test[,!(names(test)%in%c("1","2","student"))]
       
-      complete.data.set <- getOriginDataSet(str)
+      complete.data.set <- getOriginDataSet(string)
+      complete.data.set$student.id <- getOriginalStudentID(rownames(complete.data.set))
       add.fields <- names(test)[!(names(test)%in%names(complete.data.set))]
       add.fields <- c("student.id",add.fields)
       test.sample <- test[,add.fields]
       test.all.fields <- merge(complete.data.set,test.sample,by = c("student.id"))
 	  
-	 
-      
-      test.all.fields$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
-      test$semana <- as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana))
+      test.all.fields$semana <- current.week[current.week$degree == grad,"max.semana"]
+      test$semana <- current.week[current.week$degree == grad,"max.semana"]
 	  
-		model.processed <- paste0("Week-",
-								as.character(unique(subset(main.data.frames@AllWeek, grado == grad)$semana)),
+		  model.processed <- paste0("Week-",
+		            current.week[current.week$degree == grad,"max.semana"],
 								"-",
 								if(kind=="Bio") "Novo" else "Veteran",
 								"-For-",
 								grad)
 	  
-      write.csv2(test, file = paste0("outputs/",model.processed ,semesters,".csv") )
+		  semesters <- semesters[!is.na(semesters)]
+		  write.csv2(test, file = paste0("outputs/",model.processed ,semesters,".csv") )
       write.csv2(test.all.fields, file = paste0("outputs/",model.processed ,"_extended_version_",semesters,".csv") )
       
       summary_ <- as.data.frame(round(prop.table(table(test$general_risk))*100,2))
       
       red 	 <- ifelse(length(subset(summary_,Var1=="RED")$Freq) == 0, 0,  subset(summary_,Var1=="RED")$Freq)
-	  orange <- ifelse(length(subset(summary_,Var1=="ORANGE")$Freq) == 0, 0,  subset(summary_,Var1=="ORANGE")$Freq)
-	  yellow <- ifelse(length(subset(summary_,Var1=="YELLOW")$Freq) == 0, 0,  subset(summary_,Var1=="YELLOW")$Freq)
-	  green	 <- ifelse(length(subset(summary_,Var1=="GREEN")$Freq) == 0, 0,  subset(summary_,Var1=="GREEN")$Freq)
+	    orange <- ifelse(length(subset(summary_,Var1=="ORANGE")$Freq) == 0, 0,  subset(summary_,Var1=="ORANGE")$Freq)
+	    yellow <- ifelse(length(subset(summary_,Var1=="YELLOW")$Freq) == 0, 0,  subset(summary_,Var1=="YELLOW")$Freq)
+	    green	 <- ifelse(length(subset(summary_,Var1=="GREEN")$Freq) == 0, 0,  subset(summary_,Var1=="GREEN")$Freq)
 	  
-       
+
       if(!dev){
-        
-        
+
+
         send.email.model.completed(model.processed,
                                     nrow(test),
                                     red,
@@ -394,10 +389,10 @@ for (grad in grads) {
 								                    yellow,
 								                    green)
       }
-      
-      
-      
-      
+
+
+
+
       send.slack.model.completed(model.processed,
                                   nrow(test),
                                   red,
@@ -410,4 +405,3 @@ for (grad in grads) {
     
   }
 }
-

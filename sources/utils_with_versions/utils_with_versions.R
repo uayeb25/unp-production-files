@@ -1,3 +1,13 @@
+
+packages <- c("plyr","jsonlite","curl","stringr","caret")
+
+check.install.load.Package<-function(package_name){
+  if(!package_name%in%installed.packages()){install.packages(package_name)}
+  library(package_name,character.only = TRUE)} 
+
+for(package in packages){check.install.load.Package(package)}
+
+
 send.email.model.completed <- function(model,
                                        number,
                                        red,
